@@ -1,7 +1,7 @@
 // Creating map object
 var myMap = L.map("map", {
-    center: [34.0522, -118.2437],
-    zoom: 8
+    center: [35.7465, 39.4629],
+    zoom: 3
   });
   
   // Adding tile layer
@@ -22,7 +22,7 @@ var myMap = L.map("map", {
   // Grab data with d3
   d3.json(geoData, function(data) {
   
-    // Add functions for magnitude and depth
+    // Add functions for data markers: depth (color) and magnitude (size)
     function mapStyle(feature) {
         return {
           opacity: 1,
@@ -37,17 +37,17 @@ var myMap = L.map("map", {
       function mapColor(mag) {
         switch (true) {
           case mag > 5:
-            return "#ea2c2c";
+            return "#8B0000";
           case mag > 4:
-            return "#eaa92c";
+            return "#FF0000";
           case mag > 3:
-            return "#d5ea2c";
+            return "#FFA500";
           case mag > 2:
-            return "#92ea2c";
+            return "#FFD700";
           case mag > 1:
-            return "#2ceabf";
+            return "#ADFF2F";
           default:
-            return "#2c99ea";
+            return "#00FFFF";
         }
       }
     
@@ -67,7 +67,7 @@ var myMap = L.map("map", {
     
         style: mapStyle,
     
-        // Binding a pop-up to each layer
+        // Binding a pop-up to each layer (magnitude and location)
         onEachFeature: function(feature, layer) {
           layer.bindPopup("Magnitude: " + feature.properties.mag + "<br>Location: " + feature.properties.place);
     
@@ -76,32 +76,25 @@ var myMap = L.map("map", {
 
   
     // Set up the legend
-    var legend = L.control({ position: "bottomright" });
-    legend.onAdd = function() {
-      var div = L.DomUtil.create("div", "info legend");
-      var limits = geojson.options.limits;
-      var colors = geojson.options.colors;
-      var labels = [];
-  
-      // Add min & max
-      var legendInfo = "<h1>Median Income</h1>" +
-        "<div class=\"labels\">" +
-          "<div class=\"min\">" + limits[0] + "</div>" +
-          "<div class=\"max\">" + limits[limits.length - 1] + "</div>" +
-        "</div>";
-  
-      div.innerHTML = legendInfo;
-  
-      limits.forEach(function(limit, index) {
-        labels.push("<li style=\"background-color: " + colors[index] + "\"></li>");
-      });
-  
-      div.innerHTML += "<ul>" + labels.join("") + "</ul>";
-      return div;
+    var legend = L.control({position: 'bottomleft'});
+    legend.onAdd = function (map) {
+    
+    var div = L.DomUtil.create('div', 'info legend');
+    labels = ['<strong>Magnitudes</strong>'],
+    categories = ['0-1','1-2','2-3','3-4', '4-5'];
+    
+    for (var i = 0; i < categories.length; i++) {
+    
+            div.innerHTML += 
+            labels.push(
+                '<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' +
+            (categories[i] ? categories[i] : '+'));
+    
+        }
+        div.innerHTML = labels.join('<br>');
+    return div;
     };
-  
-    // Adding legend to the map
-    legend.addTo(myMap);
+    legend.addTo(map);
   
   });
   
